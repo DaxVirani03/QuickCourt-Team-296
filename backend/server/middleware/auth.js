@@ -8,13 +8,10 @@ const protect = async (req, res, next) => {
   // Check for token in headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // Get token from header
       token = req.headers.authorization.split(' ')[1];
 
-      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Get user from token
       req.user = await User.findById(decoded.id).select('-password');
 
       if (!req.user) {
@@ -40,7 +37,6 @@ const protect = async (req, res, next) => {
       });
     }
   }
-
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -49,7 +45,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Grant access to specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -105,21 +100,17 @@ const checkOwnership = (model, paramName = 'id') => {
     try {
       const resourceId = req.params[paramName];
       const resource = await model.findById(resourceId);
-
       if (!resource) {
         return res.status(404).json({
           success: false,
           message: 'Resource not found'
         });
       }
-
       // Admin can access all resources
       if (req.user.role === 'admin') {
         req.resource = resource;
         return next();
       }
-
-      // Check if user owns the resource
       const ownerField = model.modelName === 'User' ? '_id' : 'owner';
       if (resource[ownerField].toString() !== req.user._id.toString()) {
         return res.status(403).json({
@@ -127,7 +118,6 @@ const checkOwnership = (model, paramName = 'id') => {
           message: 'Not authorized to access this resource'
         });
       }
-
       req.resource = resource;
       next();
     } catch (error) {
@@ -142,28 +132,23 @@ const checkOwnership = (model, paramName = 'id') => {
 // Rate limiting for specific actions
 const rateLimit = (maxAttempts = 5, windowMs = 15 * 60 * 1000) => {
   const attempts = new Map();
-
   return (req, res, next) => {
     const key = req.ip || req.connection.remoteAddress;
     const now = Date.now();
     const windowStart = now - windowMs;
 
-    // Clean old attempts
     if (attempts.has(key)) {
       attempts.set(key, attempts.get(key).filter(timestamp => timestamp > windowStart));
     } else {
       attempts.set(key, []);
     }
-
     const userAttempts = attempts.get(key);
-
     if (userAttempts.length >= maxAttempts) {
       return res.status(429).json({
         success: false,
         message: 'Too many attempts, please try again later'
       });
     }
-
     userAttempts.push(now);
     next();
   };
