@@ -1,0 +1,22 @@
+{
+  "name": "quickcourt",
+  "version": "1.0.0",
+  "description": "Local Sports Booking Platform - MERN Stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend/server/index.js",
+    "server": "nodemon backend/server/index.js",
+    "client": "cd frontend/client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend/client && npm install",
+    "build": "cd frontend/client && npm run build",
+    "setup": "node setup.js"
+  },
+  "keywords": ["sports", "booking", "mern", "mongodb", "react", "express"],
+  "author": "Hemang",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.1"
+  }
+} 
