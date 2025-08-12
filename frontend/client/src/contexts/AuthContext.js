@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+axios.defaults.baseURL = API_BASE_URL;
+
 const AuthContext = createContext();
 
 const initialState = {
@@ -84,17 +87,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     dispatch({ type: 'AUTH_START' });
-    
     try {
       const res = await axios.post('/api/auth/login', { email, password });
       const { user, token } = res.data;
-      
       localStorage.setItem('token', token);
-      dispatch({
-        type: 'AUTH_SUCCESS',
-        payload: { user, token }
-      });
-      
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user, token } });
       return res.data;
     } catch (error) {
       dispatch({ type: 'AUTH_FAIL' });
@@ -104,18 +101,20 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     dispatch({ type: 'AUTH_START' });
-    
     try {
-      const res = await axios.post('/api/auth/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const res = await axios.post('/api/auth/signup', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
       return res.data;
     } catch (error) {
       dispatch({ type: 'AUTH_FAIL' });
-      throw error;
+      // Normalize error for UI
+      const message = error?.response?.data?.errors?.[0]?.msg || error?.message || 'Registration failed';
+      const detail = error?.response?.data?.errors?.[0]?.detail;
+      const type = error?.response?.data?.errors?.[0]?.type;
+      const normalized = new Error(message + (detail ? `: ${detail}` : ''));
+      normalized.type = type;
+      throw normalized;
     }
   };
 
@@ -125,46 +124,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    dispatch({
-      type: 'UPDATE_USER',
-      payload: userData
-    });
-  };
-
-  const verifyEmail = async (email, otp) => {
-    try {
-      const res = await axios.post('/api/auth/verify-email', { email, otp });
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const forgotPassword = async (email) => {
-    try {
-      const res = await axios.post('/api/auth/forgot-password', { email });
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const resetPassword = async (token, password) => {
-    try {
-      const res = await axios.post('/api/auth/reset-password', { token, password });
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const resendVerification = async (email) => {
-    try {
-      const res = await axios.post('/api/auth/resend-verification', { email });
-      return res.data;
-    } catch (error) {
-      throw error;
-    }
+    dispatch({ type: 'UPDATE_USER', payload: userData });
   };
 
   const value = {
@@ -175,11 +135,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    updateUser,
-    verifyEmail,
-    forgotPassword,
-    resetPassword,
-    resendVerification
+    updateUser
   };
 
   return (

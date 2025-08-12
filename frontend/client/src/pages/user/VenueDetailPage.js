@@ -11,7 +11,7 @@ import {
   Wifi,
   Car,
   Coffee,
-  Shower,
+  ShowerHead,
   Dumbbell,
   Shield,
   ArrowLeft,
@@ -46,7 +46,7 @@ const VenueDetailPage = () => {
           { name: "Parking", icon: Car, available: true },
           { name: "WiFi", icon: Wifi, available: true },
           { name: "Cafe", icon: Coffee, available: true },
-          { name: "Showers", icon: Shower, available: true },
+          { name: "Showers", icon: ShowerHead, available: true },
           { name: "Equipment Rental", icon: Dumbbell, available: true },
           { name: "Security", icon: Shield, available: true }
         ],

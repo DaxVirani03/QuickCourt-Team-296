@@ -41,8 +41,9 @@ const userSchema = new mongoose.Schema({
   },
   isEmailVerified: {
     type: Boolean,
-    default: false
+    default: true
   },
+  // Legacy fields (keeping for backward compatibility)
   emailVerificationToken: String,
   emailVerificationExpire: Date,
   resetPasswordToken: String,
@@ -106,7 +107,9 @@ userSchema.methods.comparePassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Generate email verification token
+
+
+// Generate email verification token (legacy method)
 userSchema.methods.generateEmailVerificationToken = function() {
   const verificationToken = crypto.randomBytes(20).toString('hex');
   
@@ -120,7 +123,7 @@ userSchema.methods.generateEmailVerificationToken = function() {
   return verificationToken;
 };
 
-// Generate password reset token
+// Generate password reset token (legacy method)
 userSchema.methods.generatePasswordResetToken = function() {
   const resetToken = crypto.randomBytes(20).toString('hex');
   

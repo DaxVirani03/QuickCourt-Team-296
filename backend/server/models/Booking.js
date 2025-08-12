@@ -50,7 +50,7 @@ const bookingSchema = new mongoose.Schema({
     },
     currency: {
       type: String,
-      default: 'USD'
+      default: 'INR'
     },
     appliedMultipliers: [{
       type: String,
@@ -77,7 +77,7 @@ const bookingSchema = new mongoose.Schema({
     amount: Number,
     currency: {
       type: String,
-      default: 'USD'
+      default: 'INR'
     },
     paidAt: Date
   },
